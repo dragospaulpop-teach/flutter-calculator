@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -25,25 +27,32 @@ class MyApp extends StatelessWidget {
         ),
         textTheme: const TextTheme(
           displayLarge: TextStyle(
-            fontSize: 82,
+            fontSize: 74,
             fontWeight: FontWeight.normal,
             color: Colors.white,
           ),
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
+            backgroundColor: Colors.deepOrange.shade400,
+            foregroundColor: Colors.black,
             textStyle: const TextStyle(
-              fontSize: 32,
+              fontSize: 48,
+              fontWeight: FontWeight.normal,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(
-                color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: Colors.deepOrangeAccent.shade100,
                 width: 1,
               ),
             ),
-            fixedSize: const Size(100, 100),
+            fixedSize: const Size(104, 104),
           ),
+        ),
+        listTileTheme: ListTileThemeData(
+          textColor: Colors.deepOrangeAccent.shade100,
+          dense: true,
         ),
         useMaterial3: true,
       ),
@@ -62,11 +71,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  ScrollController _historyScrollController = ScrollController();
+
   double _result = 0;
   double _firstOperand = 0;
   double _secondOperand = 0;
   String _operation = '';
   bool _dotClicked = false;
+  List<Map<String, dynamic>> history = [
+    {
+      'dot': false,
+      'firstOperand': 0,
+      'secondOperand': 0,
+      'operation': '',
+      'result': 0,
+    }
+  ];
 
   void compute() {
     setState(() {
@@ -88,11 +108,18 @@ class _MyHomePageState extends State<MyHomePage> {
           break;
         default:
       }
-      _result = double.parse(_result.toString().substring(0, 8));
+
+      String resultAsString = _result.toString();
+      if (resultAsString.length > 8) {
+        _result = double.parse(resultAsString.substring(0, 8));
+      } else {
+        _result = double.parse(resultAsString);
+      }
       _firstOperand = _result;
       _secondOperand = 0;
       _dotClicked = false;
     });
+    addHistoryRow();
   }
 
   void numberClicked(int number) {
@@ -103,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // add to the decimal part of the number
           String temp = _firstOperand.toString();
           if (!temp.contains('.')) {
-            temp = temp + '.';
+            temp = '$temp.';
           }
           _firstOperand = double.parse(temp + number.toString());
         } else {
@@ -116,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
         if (_dotClicked) {
           String temp = _secondOperand.toString();
           if (!temp.contains('.')) {
-            temp = temp + '.';
+            temp = '$temp.';
           }
           _secondOperand = double.parse(temp + number.toString());
         } else {
@@ -125,18 +152,28 @@ class _MyHomePageState extends State<MyHomePage> {
         _result = _secondOperand;
       }
     });
+    updateHistoryRow();
   }
 
   void clearOne() {
     setState(() {
       if (_operation == '') {
-        _firstOperand = _firstOperand ~/ 10 as double;
+        String temp = _firstOperand.toString();
+        if (temp.length > 1) {
+          temp = temp.substring(0, temp.length - 1);
+        }
+        _firstOperand = double.parse(temp);
         _result = _firstOperand;
       } else {
-        _secondOperand = _secondOperand ~/ 10 as double;
+        String temp = _secondOperand.toString();
+        if (temp.length > 1) {
+          temp = temp.substring(0, temp.length - 1);
+        }
+        _secondOperand = double.parse(temp);
         _result = _secondOperand;
       }
     });
+    updateHistoryRow();
   }
 
   void setOperation(String op) {
@@ -149,6 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       _dotClicked = false;
     });
+    updateHistoryRow();
   }
 
   void clear() {
@@ -158,22 +196,66 @@ class _MyHomePageState extends State<MyHomePage> {
       _operation = '';
       _result = 0;
       _dotClicked = false;
+      history = [
+        {
+          'dot': false,
+          'firstOperand': 0,
+          'secondOperand': 0,
+          'operation': '',
+          'result': 0,
+        }
+      ];
     });
   }
 
-  void addDot() {
+  void toggleDot() {
     setState(() {
-      _dotClicked = true;
+      _dotClicked = !_dotClicked;
+    });
+    updateHistoryRow();
+  }
+
+  void addHistoryRow() {
+    setState(() {
+      history.add({
+        'dot': _dotClicked,
+        'firstOperand': _firstOperand,
+        'secondOperand': _secondOperand,
+        'operation': _operation,
+        'result': _result
+      });
+    });
+    _scrollToBottom();
+  }
+
+  void updateHistoryRow() {
+    setState(() {
+      history[history.length - 1] = {
+        'dot': _dotClicked,
+        'firstOperand': _firstOperand,
+        'secondOperand': _secondOperand,
+        'operation': _operation,
+        'result': _result
+      };
+    });
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_historyScrollController.hasClients) {
+        _historyScrollController.animateTo(
+          _historyScrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -181,34 +263,83 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // results container
-              Expanded(
-                flex: 20,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.primary,
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          "$_result",
-                          style: Theme.of(context).textTheme.displayLarge,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary,
+                          width: 1,
                         ),
                       ),
+                      child: Text(
+                        "$_result",
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayLarge
+                            ?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary),
+                      ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    // border: Border.all(
+                    //   color: Colors.white,
+                    //   width: 1,
+                    // ),
+                  ),
+                  height: 200,
+                  child: ListView.builder(
+                    controller: _historyScrollController,
+                    itemCount: history.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                          title: const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              HistoryCell(content: 'dot'),
+                              HistoryCell(content: '1st op'),
+                              HistoryCell(content: '2nd op'),
+                              HistoryCell(content: 'operation'),
+                              HistoryCell(content: 'result'),
+                            ],
+                          ),
+                          subtitle: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                HistoryCell(
+                                  content: history[index]['dot'],
+                                ),
+                                HistoryCell(
+                                  content: history[index]['firstOperand'],
+                                ),
+                                HistoryCell(
+                                  content: history[index]['secondOperand'],
+                                ),
+                                HistoryCell(
+                                  content: history[index]['operation'],
+                                ),
+                                HistoryCell(
+                                  content: history[index]['result'],
+                                ),
+                              ]));
+                    },
+                  ),
                 ),
               ),
-              SizedBox(height: 100),
               // buttons container
               Expanded(
-                flex: 80,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -309,7 +440,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: const Text("0"),
                         ),
                         TextButton(
-                          onPressed: addDot,
+                          onPressed: toggleDot,
                           child: const Text("."),
                         ),
                         TextButton(
@@ -328,6 +459,29 @@ class _MyHomePageState extends State<MyHomePage> {
               // SizedBox(height: 20),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class HistoryCell extends StatelessWidget {
+  const HistoryCell({
+    super.key,
+    required this.content,
+  });
+
+  final dynamic content;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: 1,
+      child: Container(
+        alignment: Alignment.center,
+        child: Text(
+          textAlign: TextAlign.center,
+          content.toString(),
         ),
       ),
     );
