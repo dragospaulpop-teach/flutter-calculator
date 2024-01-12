@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 
 void main() {
@@ -37,7 +35,7 @@ class MyApp extends StatelessWidget {
             backgroundColor: Colors.deepOrange.shade400,
             foregroundColor: Colors.black,
             textStyle: const TextStyle(
-              fontSize: 48,
+              fontSize: 32,
               fontWeight: FontWeight.normal,
             ),
             shape: RoundedRectangleBorder(
@@ -47,7 +45,7 @@ class MyApp extends StatelessWidget {
                 width: 1,
               ),
             ),
-            fixedSize: const Size(104, 104),
+            fixedSize: const Size(80, 80),
           ),
         ),
         listTileTheme: ListTileThemeData(
@@ -256,208 +254,212 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // results container
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Container(
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        "$_result",
-                        style: Theme.of(context)
-                            .textTheme
-                            .displayLarge
-                            ?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimary),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    // border: Border.all(
-                    //   color: Colors.white,
-                    //   width: 1,
-                    // ),
-                  ),
-                  height: 200,
-                  child: ListView.builder(
-                    controller: _historyScrollController,
-                    itemCount: history.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                          title: const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              HistoryCell(content: 'dot'),
-                              HistoryCell(content: '1st op'),
-                              HistoryCell(content: '2nd op'),
-                              HistoryCell(content: 'operation'),
-                              HistoryCell(content: 'result'),
-                            ],
-                          ),
-                          subtitle: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                HistoryCell(
-                                  content: history[index]['dot'],
-                                ),
-                                HistoryCell(
-                                  content: history[index]['firstOperand'],
-                                ),
-                                HistoryCell(
-                                  content: history[index]['secondOperand'],
-                                ),
-                                HistoryCell(
-                                  content: history[index]['operation'],
-                                ),
-                                HistoryCell(
-                                  content: history[index]['result'],
-                                ),
-                              ]));
-                    },
-                  ),
-                ),
-              ),
-              // buttons container
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // results container
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // first row: %% C CE <-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        TextButton(
-                          onPressed: () => setOperation("%"),
-                          child: const Text("%"),
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 1,
+                          ),
                         ),
-                        TextButton(
-                          onPressed: clear,
-                          child: const Text("C"),
+                        child: Text(
+                          "$_result",
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayLarge
+                              ?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary),
                         ),
-                        TextButton(
-                          onPressed: () {},
-                          child: const Text("CE"),
-                        ),
-                        TextButton(
-                          onPressed: clearOne,
-                          child: const Icon(Icons.arrow_left),
-                        ),
-                      ],
-                    ),
-                    // second row: 7 8 9 /
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        TextButton(
-                          onPressed: () => numberClicked(7),
-                          child: const Text("7"),
-                        ),
-                        TextButton(
-                          onPressed: () => numberClicked(8),
-                          child: const Text("8"),
-                        ),
-                        TextButton(
-                          onPressed: () => numberClicked(9),
-                          child: const Text("9"),
-                        ),
-                        TextButton(
-                          onPressed: () => setOperation("/"),
-                          child: const Text("/"),
-                        ),
-                      ],
-                    ),
-                    // third row: 4 5 6 *
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        TextButton(
-                          onPressed: () => numberClicked(4),
-                          child: const Text("4"),
-                        ),
-                        TextButton(
-                          onPressed: () => numberClicked(5),
-                          child: const Text("5"),
-                        ),
-                        TextButton(
-                          onPressed: () => numberClicked(6),
-                          child: const Text("6"),
-                        ),
-                        TextButton(
-                          onPressed: () => setOperation("*"),
-                          child: const Text("*"),
-                        ),
-                      ],
-                    ),
-                    // fourth row: 1 2 3 -
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        TextButton(
-                          onPressed: () => numberClicked(1),
-                          child: const Text("1"),
-                        ),
-                        TextButton(
-                          onPressed: () => numberClicked(2),
-                          child: const Text("2"),
-                        ),
-                        TextButton(
-                          onPressed: () => numberClicked(3),
-                          child: const Text("3"),
-                        ),
-                        TextButton(
-                          onPressed: () => setOperation("-"),
-                          child: const Text("-"),
-                        ),
-                      ],
-                    ),
-                    // fifth row:  +/- 0 . +
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        TextButton(
-                          onPressed: () {},
-                          child: const Text("0"),
-                        ),
-                        TextButton(
-                          onPressed: toggleDot,
-                          child: const Text("."),
-                        ),
-                        TextButton(
-                          onPressed: compute,
-                          child: const Text("="),
-                        ),
-                        TextButton(
-                          onPressed: () => setOperation("+"),
-                          child: const Text("+"),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-              // SizedBox(height: 20),
-            ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      // border: Border.all(
+                      //   color: Colors.white,
+                      //   width: 1,
+                      // ),
+                    ),
+                    height: 200,
+                    child: ListView.builder(
+                      controller: _historyScrollController,
+                      itemCount: history.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                            title: const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                HistoryCell(content: 'dot'),
+                                HistoryCell(content: '1st op'),
+                                HistoryCell(content: '2nd op'),
+                                HistoryCell(content: 'operation'),
+                                HistoryCell(content: 'result'),
+                              ],
+                            ),
+                            subtitle: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  HistoryCell(
+                                    content: history[index]['dot'],
+                                  ),
+                                  HistoryCell(
+                                    content: history[index]['firstOperand'],
+                                  ),
+                                  HistoryCell(
+                                    content: history[index]['secondOperand'],
+                                  ),
+                                  HistoryCell(
+                                    content: history[index]['operation'],
+                                  ),
+                                  HistoryCell(
+                                    content: history[index]['result'],
+                                  ),
+                                ]));
+                      },
+                    ),
+                  ),
+                ),
+                // buttons container
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // first row: %% C CE <-
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                            onPressed: () => setOperation("%"),
+                            child: const Text("%"),
+                          ),
+                          TextButton(
+                            onPressed: clear,
+                            child: const Text("C"),
+                          ),
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text("CE"),
+                          ),
+                          TextButton(
+                            onPressed: clearOne,
+                            child: const Icon(Icons.arrow_left),
+                          ),
+                        ],
+                      ),
+                      // second row: 7 8 9 /
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                            onPressed: () => numberClicked(7),
+                            child: const Text("7"),
+                          ),
+                          TextButton(
+                            onPressed: () => numberClicked(8),
+                            child: const Text("8"),
+                          ),
+                          TextButton(
+                            onPressed: () => numberClicked(9),
+                            child: const Text("9"),
+                          ),
+                          TextButton(
+                            onPressed: () => setOperation("/"),
+                            child: const Text("/"),
+                          ),
+                        ],
+                      ),
+                      // third row: 4 5 6 *
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                            onPressed: () => numberClicked(4),
+                            child: const Text("4"),
+                          ),
+                          TextButton(
+                            onPressed: () => numberClicked(5),
+                            child: const Text("5"),
+                          ),
+                          TextButton(
+                            onPressed: () => numberClicked(6),
+                            child: const Text("6"),
+                          ),
+                          TextButton(
+                            onPressed: () => setOperation("*"),
+                            child: const Text("*"),
+                          ),
+                        ],
+                      ),
+                      // fourth row: 1 2 3 -
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                            onPressed: () => numberClicked(1),
+                            child: const Text("1"),
+                          ),
+                          TextButton(
+                            onPressed: () => numberClicked(2),
+                            child: const Text("2"),
+                          ),
+                          TextButton(
+                            onPressed: () => numberClicked(3),
+                            child: const Text("3"),
+                          ),
+                          TextButton(
+                            onPressed: () => setOperation("-"),
+                            child: const Text("-"),
+                          ),
+                        ],
+                      ),
+                      // fifth row:  +/- 0 . +
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text("0"),
+                          ),
+                          TextButton(
+                            onPressed: toggleDot,
+                            child: const Text("."),
+                          ),
+                          TextButton(
+                            onPressed: compute,
+                            child: const Text("="),
+                          ),
+                          TextButton(
+                            onPressed: () => setOperation("+"),
+                            child: const Text("+"),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),
